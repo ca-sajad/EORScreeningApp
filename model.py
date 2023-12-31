@@ -6,10 +6,10 @@ from generate_input import EORDataset
 from typing import List, Tuple
 
 BATCH_SIZE = 32
-INPUT_SIZE = 7
+INPUT_SIZE = 2
 HIDDEN_SIZE = 16
 OUTPUT_SIZE = 9
-NUM_EPOCHS = 100
+NUM_EPOCHS = 1
 
 
 class EORMulticlassModel(nn.Module):
@@ -35,9 +35,6 @@ def train_step(model: nn.Module,
     for inputs, classes in train_dataloader:
         outputs = model(inputs)
 
-        print(outputs)
-        print(classes)
-
         loss = loss_fn(outputs, classes)
         train_loss += loss.item()
 
@@ -46,6 +43,9 @@ def train_step(model: nn.Module,
         optimizer.step()
 
         outputs_class = torch.argmax(torch.softmax(outputs, dim=1), dim=1)
+
+        x = torch.softmax(outputs, dim=1)
+
         train_acc += (outputs_class == classes).sum().item() / len(outputs_class)
 
     # Adjust metrics to get average loss and accuracy per batch
@@ -79,7 +79,7 @@ def valid_step(model: nn.Module,
 
 
 def train_model(train_dataset: EORDataset, valid_dataset: EORDataset):
-    print("training started")
+
     train_dataloader = DataLoader(dataset=train_dataset, batch_size=BATCH_SIZE, shuffle=True,
                                   num_workers=os.cpu_count())
     valid_dataloader = DataLoader(dataset=valid_dataset, batch_size=BATCH_SIZE, shuffle=False,
@@ -94,15 +94,16 @@ def train_model(train_dataset: EORDataset, valid_dataset: EORDataset):
                                            loss_fn=loss_fn,
                                            optimizer=optimizer)
 
-        valid_loss, valid_acc = valid_step(model=model,
-                                           valid_dataloader=valid_dataloader,
-                                           loss_fn=loss_fn)
+        # valid_loss, valid_acc = valid_step(model=model,
+        #                                    valid_dataloader=valid_dataloader,
+        #                                    loss_fn=loss_fn)
+        valid_loss, valid_acc = 0, 0
 
         print(
             f"Epoch: {epoch + 1} | "
             f"train_loss: {train_loss:.4f} | "
             f"train_acc: {train_acc:.4f} | "
-            f"test_loss: {valid_loss:.4f} | "
-            f"test_acc: {valid_acc:.4f}"
+            f"valid_loss: {valid_loss:.4f} | "
+            f"valid_acc: {valid_acc:.4f}"
         )
 

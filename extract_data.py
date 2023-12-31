@@ -5,11 +5,13 @@ from typing import List, Tuple
 DIST_EXCEL_FILE = "./data/distribution_data.xlsx"
 AVE_SHEET = "average"
 STD_DEV_SHEET = "std_dev"
+MIN_SHEET = "min"
+MAX_SHEET = "max"
 
 
-def extract() -> Tuple[List[List[str | float]], List[List[str | float]]]:
+def extract() -> Tuple[List[List[str | float]], List[List[str | float]], List[List[str | float]], List[List[str | float]]]:
     """
-    reads standard deviation and average of property distributions for EOR projects from an Excel file
+    reads characteristics of property distributions of EOR projects from an Excel file
     :return: list of average values of properties, list of sta dev values of properties
     """
     # reading properties' "average" data
@@ -20,4 +22,12 @@ def extract() -> Tuple[List[List[str | float]], List[List[str | float]]]:
     std_dev_df = pd.read_excel(DIST_EXCEL_FILE, sheet_name=STD_DEV_SHEET)
     std_dev_list = std_dev_df.values.tolist()
 
-    return ave_list, std_dev_list
+    # reading properties' "standard deviation" data
+    min_df = pd.read_excel(DIST_EXCEL_FILE, sheet_name=MIN_SHEET)
+    min_list = min_df.values.tolist()
+
+    # reading properties' "standard deviation" data
+    max_df = pd.read_excel(DIST_EXCEL_FILE, sheet_name=MAX_SHEET)
+    max_list = max_df.values.tolist()
+
+    return ave_list, std_dev_list, min_list, max_list

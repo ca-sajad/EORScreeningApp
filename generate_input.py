@@ -6,15 +6,19 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset, random_split
 from typing import List, Tuple
+from sklearn.decomposition import PCA
+
 
 TRAIN_PORTION = 0.8
-
+NUM_CLASSES = 9
+NUM_PROPERTIES = 7
 
 class EORDataset(Dataset):
     def __init__(self, data: List[List[float]], labels: List[str]) -> None:
         self.train_data = data
         self.classes = labels
-        self.class_to_idx = {name: i for i, name in enumerate(set(self.classes))}
+        sorted_set = sorted(set(self.classes), key=lambda s: s.lower())
+        self.class_to_idx = {name: i for i, name in enumerate(sorted_set)}
 
     def __len__(self) -> int:
         return len(self.train_data)
@@ -27,8 +31,9 @@ class EORDataset(Dataset):
         return torch.tensor(sample, dtype=torch.float32), class_idx
 
 
-def generate_samples(ave_list: List[List[str | float]], std_dev_list: List[List[str | float]], num_samples: int) -> \
-        Tuple[List[List[float]], List[str]]:
+def generate_samples(ave_list: List[List[str | float]], std_dev_list: List[List[str | float]],
+                     min_list: List[List[str | float]], max_list: List[List[str | float]],
+                     num_samples: int) -> Tuple[List[List[float]], List[str]]:
     """
 
     :param ave_list:
@@ -36,24 +41,29 @@ def generate_samples(ave_list: List[List[str | float]], std_dev_list: List[List[
     :param num_samples:
     :return:
     """
-    train_data = []
-    train_labels = []
-    for l1, l2 in zip(ave_list, std_dev_list):
-        train_labels.extend([l1[0]] * num_samples)
+    input_data = []
+    input_labels = []
+    additional_samples = 10 * num_samples
 
-        prop1 = np.random.normal(loc=l1[1], scale=l2[1], size=num_samples)
-        prop2 = np.random.normal(loc=l1[2], scale=l2[2], size=num_samples)
-        prop3 = np.random.normal(loc=l1[3], scale=l2[3], size=num_samples)
-        prop4 = np.random.normal(loc=l1[4], scale=l2[4], size=num_samples)
-        prop5 = np.random.normal(loc=l1[5], scale=l2[5], size=num_samples)
-        prop6 = np.random.normal(loc=l1[6], scale=l2[6], size=num_samples)
-        prop7 = np.random.normal(loc=l1[7], scale=l2[7], size=num_samples)
+    for l1, l2, l3, l4 in zip(ave_list, std_dev_list, min_list, max_list):
+        input_labels.extend([l1[0]] * num_samples)
+        samples = []
 
-        samples = [[p1, p2, p3, p4, p5, p6, p7] for p1, p2, p3, p4, p5, p6, p7 in
-                   zip(prop1, prop2, prop3, prop4, prop5, prop6, prop7)]
-        train_data.extend(samples)
+        props = []
+        for i in range(1, NUM_PROPERTIES+1):
+            prop = np.random.normal(loc=l1[i], scale=l2[i]*0.5, size=additional_samples)
+            prop = list(filter(lambda p: l3[i] <= p <= l4[i], prop))
+            props.append(prop[:num_samples])
 
-    return train_data, train_labels
+        for i in range(num_samples):
+            sample = []
+            for j in range(NUM_PROPERTIES):
+                sample.append(props[j][i])
+            samples.append(sample)
+
+        input_data.extend(samples)
+
+    return input_data, input_labels
 
 
 def calculate_minmax():
@@ -65,5 +75,10 @@ def create_dataset(data: List[List[float]], labels: List[str]) -> EORDataset:
 
 
 def get_train_valid_data(EOR_dataset: EORDataset) -> List[Dataset]:
-    return random_split(EOR_dataset, [TRAIN_PORTION, 1-TRAIN_PORTION])
+    print(EOR_dataset.class_to_idx)
+    return random_split(EOR_dataset, [TRAIN_PORTION, 1 - TRAIN_PORTION])
 
+
+def convert_to_PCA(data: List[List[float]]) -> List[List[float]]:
+    pca = PCA(n_components=2)
+    return pca.fit_transform(data)

@@ -3,22 +3,25 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader
 from generate_input import EORDataset
-from typing import List, Tuple
+from typing import Tuple
 
 BATCH_SIZE = 32
-INPUT_SIZE = 2
-HIDDEN_SIZE = 16
-OUTPUT_SIZE = 9
+INPUT_SIZE = 7
+HIDDEN_SIZE = 32
+OUTPUT_SIZE = 2
 NUM_EPOCHS = 1
+LEARNING_RATE = 0.01
 
 
 class EORMulticlassModel(nn.Module):
     def __init__(self, input_size: int, hidden_size: int, output_size: int) -> None:
         super().__init__()
         self.block_1 = nn.Sequential(
-            nn.Linear(input_size, hidden_size),
+            nn.Linear(in_features=input_size, out_features=hidden_size),
             nn.ReLU(),
-            nn.Linear(hidden_size, output_size)
+            nn.Linear(in_features=hidden_size, out_features=hidden_size),
+            nn.ReLU(),
+            nn.Linear(in_features=hidden_size, out_features=output_size)
         )
 
     def forward(self, x: torch.Tensor):
@@ -43,9 +46,6 @@ def train_step(model: nn.Module,
         optimizer.step()
 
         outputs_class = torch.argmax(torch.softmax(outputs, dim=1), dim=1)
-
-        x = torch.softmax(outputs, dim=1)
-
         train_acc += (outputs_class == classes).sum().item() / len(outputs_class)
 
     # Adjust metrics to get average loss and accuracy per batch
@@ -86,7 +86,7 @@ def train_model(train_dataset: EORDataset, valid_dataset: EORDataset):
                                   num_workers=os.cpu_count())
     model = EORMulticlassModel(input_size=INPUT_SIZE, hidden_size=HIDDEN_SIZE, output_size=OUTPUT_SIZE)
     loss_fn = nn.CrossEntropyLoss()
-    optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
+    optimizer = torch.optim.SGD(model.parameters(), lr=LEARNING_RATE)
 
     for epoch in range(NUM_EPOCHS):
         train_loss, train_acc = train_step(model=model,

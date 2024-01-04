@@ -77,7 +77,8 @@ def test_step(model: nn.Module, test_dataloader: torch.utils.data.DataLoader) ->
 
 def train_model(train_dataset: EORDataset, valid_dataset: EORDataset,
                 batch_size: int, num_epochs: int, lr: float,
-                hidden_size: int, input_size: int = INPUT_SIZE,  output_size: int = OUTPUT_SIZE):
+                hidden_size: int, input_size: int = INPUT_SIZE,
+                output_size: int = OUTPUT_SIZE) -> Tuple[float, float]:
 
     train_dataloader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True,
                                   num_workers=os.cpu_count())
@@ -110,9 +111,11 @@ def train_model(train_dataset: EORDataset, valid_dataset: EORDataset,
     model_dir.mkdir(parents=True, exist_ok=True)
     torch.save(obj=model.state_dict(), f=model_dir/MODEL_NAME)
 
+    return train_acc, valid_acc
+
 
 def test_model(test_dataset: EORDataset, batch_size: int, hidden_size: int,
-               input_size: int = INPUT_SIZE,  output_size: int = OUTPUT_SIZE):
+               input_size: int = INPUT_SIZE,  output_size: int = OUTPUT_SIZE) -> float:
 
     model = EORMulticlassModel(input_size=input_size, hidden_size=hidden_size, output_size=output_size)
     model.load_state_dict(torch.load(f=f"{MODEL_PATH}/{MODEL_NAME}"))
@@ -121,3 +124,5 @@ def test_model(test_dataset: EORDataset, batch_size: int, hidden_size: int,
 
     test_acc = test_step(model=model, test_dataloader=test_dataloader)
     print(f"test_acc: {test_acc}")
+
+    return test_acc

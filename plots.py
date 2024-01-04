@@ -1,3 +1,4 @@
+from itertools import accumulate
 from typing import List
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
@@ -18,3 +19,14 @@ def scatter_plot(data: List[List[float]], labels: List[str]) -> None:
     plt.ylabel('Principal Component 2')
     plt.show()
 
+
+def plot_pca(data: List[List[float]]) -> None:
+    pca = PCA(n_components=7)
+    pca_data = pca.fit(data)
+    variance_ratios = pca_data.explained_variance_ratio_
+    cumulative_variances = list(accumulate(variance_ratios))
+    plt.plot(cumulative_variances)
+    plt.title('Plot of pca variance ratios')
+    plt.xlabel('Principal Component 1')
+    plt.ylabel('Principal Component 2')
+    plt.show()

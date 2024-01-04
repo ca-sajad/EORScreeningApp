@@ -27,8 +27,7 @@ class EORDataset(Dataset):
         return torch.tensor(sample, dtype=torch.float32), class_idx
 
 
-def generate_samples(ave_list: List[List[str | float]], std_dev_list: List[List[str | float]],
-                     min_list: List[List[str | float]], max_list: List[List[str | float]],
+def generate_samples(min_list: List[List[str | float]], max_list: List[List[str | float]],
                      samples_per_class: int, props_count: int) -> Tuple[List[List[float]], List[str]]:
 
     input_data = []
@@ -43,18 +42,6 @@ def generate_samples(ave_list: List[List[str | float]], std_dev_list: List[List[
             props.append(prop)
         samples = [[props[j][i] for j in range(props_count)] for i in range(samples_per_class)]
         input_data.extend(samples)
-
-    # generating samples using average and std dev
-    # additional_samples = 10 * samples_per_class
-    # for l1, l2, l3, l4 in zip(ave_list, std_dev_list, min_list, max_list):
-    #     input_labels.extend([l1[0]] * samples_per_class)
-    #     props = []
-    #     for i in range(1, props_count+1):
-    #         prop = np.random.normal(loc=l1[i], scale=l2[i]*0.5, size=additional_samples)
-    #         prop = list(filter(lambda p: l3[i] <= p <= l4[i], prop))
-    #         props.append(prop[:samples_per_class])
-    #     samples = [[props[j][i] for j in range(props_count)] for i in range(samples_per_class)]
-    #     input_data.extend(samples)
 
     return input_data, input_labels
 

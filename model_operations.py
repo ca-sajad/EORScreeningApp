@@ -67,8 +67,8 @@ def test_step(model: nn.Module, test_dataloader: torch.utils.data.DataLoader) ->
     with torch.inference_mode():
         for inputs, classes in test_dataloader:
             test_pred_logits = model(inputs)
-            outputs_class = test_pred_logits.argmax(dim=1)
-            test_acc += ((outputs_class == classes).sum().item() / len(outputs_class))
+            calculated_classes = test_pred_logits.argmax(dim=1)
+            test_acc += ((calculated_classes == classes).sum().item() / len(calculated_classes))
 
     test_acc /= len(test_dataloader)
 
@@ -78,7 +78,8 @@ def test_step(model: nn.Module, test_dataloader: torch.utils.data.DataLoader) ->
 def train_model(train_dataset: EORDataset, valid_dataset: EORDataset,
                 batch_size: int, num_epochs: int, lr: float,
                 hidden_size: int, input_size: int = INPUT_SIZE,
-                output_size: int = OUTPUT_SIZE) -> Tuple[float, float]:
+                output_size: int = OUTPUT_SIZE, loss_function: str = "",
+                optimization_alg: str = "") -> Tuple[float, float]:
 
     train_dataloader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True,
                                   num_workers=os.cpu_count())
@@ -100,10 +101,10 @@ def train_model(train_dataset: EORDataset, valid_dataset: EORDataset,
 
         print(
             f"Epoch: {epoch + 1} | "
-            f"train_loss: {train_loss:.4f} | "
-            f"train_acc: {train_acc:.4f} | "
-            f"valid_loss: {valid_loss:.4f} | "
-            f"valid_acc: {valid_acc:.4f}"
+            f"train_loss: {train_loss:.3f} | "
+            f"train_acc: {train_acc:.3f} | "
+            f"valid_loss: {valid_loss:.3f} | "
+            f"valid_acc: {valid_acc:.3f}"
         )
 
     # save the model

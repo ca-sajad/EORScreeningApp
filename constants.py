@@ -8,7 +8,7 @@ MAX_SHEET = "max"
 TEST_SHEET = "test_data"
 
 # Excel file for results of nn model
-RESULTS_EXCEL_FILE = "./saved_model/results.xlsx"
+RESULTS_EXCEL_FILE = "./manual_opt_results/results.xlsx"
 RESULTS_SHEET = "results_1"
 
 # data properties

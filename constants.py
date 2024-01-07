@@ -19,6 +19,9 @@ TEST_SHEET = "test_data"
 RESULTS_EXCEL_FILE = "./manual_opt_results/results.xlsx"
 RESULTS_SHEET = "results_1"
 
+# json file to save minimum and maximum values of generated data samples
+MIN_MAX_FILE = "./data/mins_maxs.json"
+
 # data properties
 NUM_PROPERTIES = 7
 NUM_CLASSES = 9

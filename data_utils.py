@@ -2,10 +2,11 @@
 """
 
 import numpy as np
+import json
 from typing_extensions import override
 import torch
 from torch.utils.data import Dataset, random_split
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 
 
 class EORDataset(Dataset):
@@ -40,8 +41,7 @@ class EORDataset(Dataset):
         return torch.tensor(sample, dtype=torch.float32), class_idx
 
 
-def generate_samples(min_list: List[List[str | float]],
-                     max_list: List[List[str | float]],
+def generate_samples(data_dict: Dict[str, List[List[str | float] | str]],
                      samples_per_class: int,
                      props_count: int) -> Tuple[List[List[float]], List[str]]:
     """Creates a list of data samples for each EOR method
@@ -54,11 +54,12 @@ def generate_samples(min_list: List[List[str | float]],
     method, the labels will be a 900x1 list, and sample data a 900x7 list.
 
     :param
-        min_list: a 2d list of minimum values of each property in each method,
-                    with size (number of methods)x(number of properties)
-    :param
-        max_list: a 2d list of maximum values of each property in each method,
-                    with size (number of methods)x(number of properties)
+        data_dict: a dictionary containing
+            - key: min_list, value: a 2d list where each element contains minimum values of properties for an EOR method,
+                e.g. [['chemical', 0.5, 2.0, 10.0], ['co2_miscible', 0.3, 1.1, 14.0]]
+            - key: max_list, value: a 2d list where each element contains maximum values of properties for an EOR method,
+                e.g. [['chemical', 2.5, 4.0, 30.0], ['co2_miscible', 0.9, 2.3, 40.0]]
+            - key: prop_labels, value: a 1d list of property names
     :param
         samples_per_class: number of samples to be generated for each EOR method
     :param
@@ -71,7 +72,7 @@ def generate_samples(min_list: List[List[str | float]],
     input_data = []
     input_labels = []
 
-    for lmin, lmax in zip(min_list, max_list):
+    for lmin, lmax in zip(data_dict['min_list'], data_dict['max_list']):
         input_labels.extend([lmin[0]] * samples_per_class)
         props = []
         for i in range(1, props_count+1):
@@ -140,3 +141,21 @@ def normalize_data(mins: List[float],
     """
     props_count = len(data[0])
     return [[(sample[i] - mins[i]) / (maxs[i] - mins[i]) for i in range(props_count)] for sample in data]
+
+
+def save_mins_maxs(mins: List[float], maxs: List[float], labels: List[str], file: str) -> None:
+    """Save minimum and maximum values of each parameter to a json file
+
+    :param mins: a list of minimum values for each parameter used
+    :param maxs: a list of maximum values for each parameter used
+    :param labels: a list of parameter names
+    :param file: file to receive data
+    :return:
+        None
+    """
+    data = {}
+    for i in range(len(mins)):
+        data[labels[i]] = {'min': mins[i], 'max': maxs[i]}
+
+    with open(file, 'w') as f:
+        json.dump(data, f, indent=4)

@@ -61,7 +61,8 @@ def run_multiple() -> None:
             'samples_per_class': params[4],
             'num_epochs': params[5],
         }
-        params[-3:] = run_model(input_dataset=input_dataset, test_dataset=test_dataset, params=hyper_params)
+        result_dict = run_model(input_dataset=input_dataset, test_dataset=test_dataset, params=hyper_params)
+        params[-3:] = [result_dict[param] for param in param_labels[-3:]]
     # save results to the Excel file
     save_results(data=param_list, labels=param_labels)
 

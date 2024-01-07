@@ -1,8 +1,16 @@
+"""Contains constant values for file names and model properties
+
+These constant values include Excel file paths and sheet names, and
+hyperparameters used to create ANN model. Hyperparameters may be
+overwritten in the course of model optimization, but the ones in this
+file are the optimized hyperparameters.
+"""
+
 
 # Excel file for distributions
 DIST_EXCEL_FILE = "./data/distribution_data.xlsx"
-AVE_SHEET = "average"
-STD_DEV_SHEET = "std_dev"
+AVE_SHEET = "average"       # is not used
+STD_DEV_SHEET = "std_dev"   # is not used
 MIN_SHEET = "min"
 MAX_SHEET = "max"
 TEST_SHEET = "test_data"
@@ -29,6 +37,3 @@ TRAIN_PORTION = 0.8
 MODEL_NAME = "EOR_model.pth"
 MODEL_PATH = "saved_model"
 
-# PCA properties
-PCA_ENABLED = 0
-PCA_COMPONENTS = 3

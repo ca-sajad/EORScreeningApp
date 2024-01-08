@@ -155,7 +155,7 @@ def save_mins_maxs(mins: List[float], maxs: List[float], labels: List[str], file
     """
     data = {}
     for i in range(len(mins)):
-        data[labels[i+1]] = {'min': mins[i], 'max': maxs[i]}
+        data[labels[i]] = {'min': mins[i], 'max': maxs[i]}
 
     with open(file, 'w') as f:
         json.dump(data, f, indent=4)

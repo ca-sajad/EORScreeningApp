@@ -27,12 +27,10 @@ def read_distribution_file() -> Dict[str, List[List[str | float] | str]]:
 
     data_dict = {}
 
-    # reading properties' "min" data
     min_df = pd.read_excel(DIST_EXCEL_FILE, sheet_name=MIN_SHEET)
     data_dict['min_list'] = min_df.values.tolist()
-    data_dict['prop_labels'] = min_df.columns.tolist()
+    data_dict['prop_labels'] = min_df.columns.tolist()[1:]
 
-    # reading properties' "max" data
     max_df = pd.read_excel(DIST_EXCEL_FILE, sheet_name=MAX_SHEET)
     data_dict['max_list'] = max_df.values.tolist()
 
@@ -53,7 +51,6 @@ def read_test_dataset_file() -> Tuple[List[List[str | float]], List[str]]:
         a 1d list of EOR methods corresponding to elements in test_data
 
     """
-    # reading properties' "test" data
     test_df = pd.read_excel(DIST_EXCEL_FILE, sheet_name=TEST_SHEET)
     test_list = test_df.values.tolist()
 

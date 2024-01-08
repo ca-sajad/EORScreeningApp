@@ -6,7 +6,6 @@ overwritten in the course of model optimization, but the ones in this
 file are the optimized hyperparameters.
 """
 
-
 # Excel file for distributions
 DIST_EXCEL_FILE = "./data/distribution_data.xlsx"
 AVE_SHEET = "average"       # is not used

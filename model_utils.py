@@ -76,10 +76,13 @@ def test_step(model: nn.Module, test_dataloader: torch.utils.data.DataLoader) ->
     return test_acc
 
 
-def train_model(train_dataset: EORDataset, valid_dataset: EORDataset,
-                batch_size: int, num_epochs: int, lr: float,
-                hidden_size: int, input_size: int,
-                output_size: int = OUTPUT_SIZE) -> Dict[str, float]:
+def train_model(model: EORMulticlassModel,
+                train_dataset: EORDataset,
+                valid_dataset: EORDataset,
+                batch_size: int,
+                num_epochs: int,
+                lr: float) -> Dict[str, float]:
+
     train_dataloader = DataLoader(dataset=train_dataset,
                                   batch_size=batch_size,
                                   shuffle=True,
@@ -88,9 +91,7 @@ def train_model(train_dataset: EORDataset, valid_dataset: EORDataset,
                                   batch_size=batch_size,
                                   shuffle=False,
                                   num_workers=os.cpu_count())
-    model = EORMulticlassModel(input_size=input_size,
-                               hidden_size=hidden_size,
-                               output_size=output_size)
+
     loss_fn = nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(model.parameters(), lr=lr)
 
@@ -112,11 +113,6 @@ def train_model(train_dataset: EORDataset, valid_dataset: EORDataset,
             f"valid_acc: {valid_acc:.3f}"
         )
 
-    # save the model
-    model_dir = Path(MODEL_PATH)
-    model_dir.mkdir(parents=True, exist_ok=True)
-    torch.save(obj=model.state_dict(), f=model_dir / MODEL_NAME)
-
     result_dict = {'train_loss': train_loss,
                    'train_acc': train_acc,
                    'valid_loss': valid_loss,
@@ -125,12 +121,9 @@ def train_model(train_dataset: EORDataset, valid_dataset: EORDataset,
     return result_dict
 
 
-def test_model(test_dataset: EORDataset, batch_size: int, hidden_size: int,
-               input_size: int, output_size: int = OUTPUT_SIZE) -> float:
-    model = EORMulticlassModel(input_size=input_size,
-                               hidden_size=hidden_size,
-                               output_size=output_size)
-    model.load_state_dict(torch.load(f=f"{MODEL_PATH}/{MODEL_NAME}"))
+def test_model(model: EORMulticlassModel,
+               test_dataset: EORDataset,
+               batch_size: int) -> float:
 
     test_dataloader = DataLoader(dataset=test_dataset,
                                  batch_size=batch_size,
@@ -178,25 +171,38 @@ def load_data() -> Tuple[EORDataset, EORDataset]:
     return input_dataset, test_dataset
 
 
+def save_model(model: EORMulticlassModel, params: Dict[str, float]) -> None:
+    # create directory
+    model_dir = Path(MODEL_PATH)
+    model_dir.mkdir(parents=True, exist_ok=True)
+
+    model_name = f"{MODEL_NAME}_hidden{params['hidden_size']}_batch{params['batch_size']}_lr{params['learning_rate']}" \
+                 f"_epochs{params['num_epochs']}_tp{params['train_portion']:.2f}{MODEL_EXTENSION}"
+    torch.save(obj=model.state_dict(), f=model_dir / model_name)
+
+
 def run_model(input_dataset: EORDataset, test_dataset: EORDataset,
               params: Dict[str, int | float]) -> Dict[str, float]:
     # divide input dataset into training and validation datasets
     train_dataset, valid_dataset = get_train_valid_data(EOR_dataset=input_dataset,
                                                         train_portion=params['train_portion'])
-    # train and save the model
-    result_dict = train_model(train_dataset=train_dataset, valid_dataset=valid_dataset,
+    model = EORMulticlassModel(input_size=INPUT_SIZE,
+                               hidden_size=params['hidden_size'],
+                               output_size=OUTPUT_SIZE)
+    # train the model
+    result_dict = train_model(model=model,
+                              train_dataset=train_dataset,
+                              valid_dataset=valid_dataset,
                               batch_size=params['batch_size'],
                               num_epochs=params['num_epochs'],
-                              lr=params['learning_rate'],
-                              hidden_size=params['hidden_size'],
-                              input_size=INPUT_SIZE)
-
+                              lr=params['learning_rate'])
     # calculate test results
-    test_acc = test_model(test_dataset=test_dataset,
-                          batch_size=params['batch_size'],
-                          hidden_size=params['hidden_size'],
-                          input_size=INPUT_SIZE)
-
+    test_acc = test_model(model=model,
+                          test_dataset=test_dataset,
+                          batch_size=params['batch_size'])
     result_dict.update({'test_acc': test_acc})
+
+    # save the model
+    save_model(model=model, params=params)
 
     return result_dict

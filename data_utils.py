@@ -76,7 +76,7 @@ def generate_samples(data_dict: Dict[str, List[List[str | float] | str]],
         input_labels.extend([lmin[0]] * samples_per_class)
         props = []
         for i in range(1, props_count+1):
-            prop = lmin[i] + (lmax[i] - lmin[i]) * np.random.normal(loc=0.5, scale=0.2, size=samples_per_class)
+            prop = lmin[i] + (lmax[i] - lmin[i]) * np.random.normal(loc=0.5, scale=0.18, size=samples_per_class)
             props.append(prop)
         samples = [[props[j][i] for j in range(props_count)] for i in range(samples_per_class)]
         input_data.extend(samples)
@@ -155,7 +155,7 @@ def save_mins_maxs(mins: List[float], maxs: List[float], labels: List[str], file
     """
     data = {}
     for i in range(len(mins)):
-        data[labels[i]] = {'min': mins[i], 'max': maxs[i]}
+        data[labels[i+1]] = {'min': mins[i], 'max': maxs[i]}
 
     with open(file, 'w') as f:
         json.dump(data, f, indent=4)

@@ -13,7 +13,7 @@ AVE_SHEET = "average"       # is not used
 STD_DEV_SHEET = "std_dev"   # is not used
 MIN_SHEET = "min"
 MAX_SHEET = "max"
-TEST_SHEET = "test_data"
+TEST_SHEET = "test_data_401"
 
 # Excel file for results of nn model
 RESULTS_EXCEL_FILE = "./manual_opt_results/results.xlsx"
@@ -29,7 +29,7 @@ NUM_CLASSES = 9
 # number of samples per class
 SAMPLES_PER_CLASS = 100
 
-# model properties
+# model hyperparameters
 BATCH_SIZE = 32
 INPUT_SIZE = NUM_PROPERTIES
 HIDDEN_SIZE = 32
@@ -37,6 +37,9 @@ OUTPUT_SIZE = NUM_CLASSES
 NUM_EPOCHS = 200
 LEARNING_RATE = 0.05
 TRAIN_PORTION = 0.8
-MODEL_NAME = "EOR_model.pth"
-MODEL_PATH = "saved_model"
+
+# model file
+MODEL_NAME = "EOR_model"
+MODEL_EXTENSION = ".pth"
+MODEL_PATH = "saved_models"
 

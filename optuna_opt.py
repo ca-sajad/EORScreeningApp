@@ -5,8 +5,8 @@ from model_utils import run_model, load_data
 def objective(trial) -> float:
     hyper_params = {
         'hidden_size': trial.suggest_int(name='hidden_size', low=32, high=128, step=16),
-        'learning_rate': trial.suggest_float(name='learning_rate', low=0.05, high=0.15, step=0.02),
         'batch_size': trial.suggest_int(name='batch_size', low=32, high=128, step=16),
+        'learning_rate': trial.suggest_float(name='learning_rate', low=0.05, high=0.15, step=0.02),
         'num_epochs': trial.suggest_int(name='num_epochs', low=150, high=300, step=50),
         'train_portion': trial.suggest_float(name='train_portion', low=0.7, high=0.95, step=0.05),
     }

@@ -1,8 +1,18 @@
+"""Contains functions for optimizing hyperparameters of EORMulticlassModel
+
+These functions use optuna optimization framework
+"""
 import optuna
-from model_utils import run_model, load_data
+from model_utils import run_model
+from data_utils import load_data
 
 
 def objective(trial) -> float:
+    """Objective function for optimization
+
+    :param trial: a optuna.trial.Trial
+    :return: average accuracy of EORMulticlassModel predictions for a test dataset
+    """
     hyper_params = {
         'hidden_size': trial.suggest_int(name='hidden_size', low=32, high=128, step=16),
         'batch_size': trial.suggest_int(name='batch_size', low=32, high=128, step=16),
@@ -20,8 +30,14 @@ def objective(trial) -> float:
 
 
 def find_optimum_model() -> None:
+    """Creates an optuna study to find the best hyperparameters
+
+    Prints the best hyperparameters
+
+    :return: None
+    """
     study = optuna.create_study(direction='maximize', study_name="EOR_ANN_model")
-    study.optimize(objective, n_trials=50)
+    study.optimize(objective, n_trials=30)
     best_params = study.best_params
     print(f"\nBest Model Parameters:")
     for key, value in best_params.items():

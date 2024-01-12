@@ -37,7 +37,7 @@ def read_distribution_file() -> Dict[str, List[List[str | float] | str]]:
     return data_dict
 
 
-def read_test_dataset_file() -> Tuple[List[List[str | float]], List[str]]:
+def read_test_dataset_file() -> Dict[str, List[List[float] | str]]:
     """Reads oilfield properties of test dataset from an Excel file
 
     Retrieves oilfield data to serve as test dataset.
@@ -51,10 +51,13 @@ def read_test_dataset_file() -> Tuple[List[List[str | float]], List[str]]:
         a 1d list of EOR methods corresponding to elements in test_data
 
     """
+    test_dict = {}
+
     test_df = pd.read_excel(DIST_EXCEL_FILE, sheet_name=TEST_SHEET)
     test_list = test_df.values.tolist()
 
-    test_data = [sample[1:] for sample in test_list]
-    test_labels = [sample[0] for sample in test_list]
+    test_dict['sample_data'] = [sample[1:] for sample in test_list]
+    test_dict['sample_label'] = [sample[0] for sample in test_list]
+    test_dict['prop_labels'] = test_df.columns.tolist()[1:]
 
-    return test_data, test_labels
+    return test_dict

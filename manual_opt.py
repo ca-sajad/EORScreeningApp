@@ -7,7 +7,8 @@ are written to the same Excel file after all calculations are finished.
 
 import pandas as pd
 from typing import List, Tuple
-from model_utils import load_data, run_model
+from data_utils import load_data
+from model_utils import run_model
 from constants import RESULTS_EXCEL_FILE, RESULTS_SHEET
 
 

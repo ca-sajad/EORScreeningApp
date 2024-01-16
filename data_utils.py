@@ -162,7 +162,13 @@ def save_mins_maxs(mins: List[float], maxs: List[float], labels: List[str], file
 
 
 def read_mins_maxs(file: str, labels: List[str]) -> Tuple[List[float], List[float]]:
+    """Reads minimum and maximum values for each property from a json file
 
+    :param file: the path of a json file containing minimum and maximum values
+    :param labels: a list of (oilfield) properties whose min and max are to be read
+    :return: a tuple where the first item is a list of minimum values of properties
+             and the second item is a list of maximum values of properties
+    """
     with open(file, 'r') as json_file:
         data = json.load(json_file)
 
@@ -170,7 +176,7 @@ def read_mins_maxs(file: str, labels: List[str]) -> Tuple[List[float], List[floa
     maxs = []
     for label in labels:
         mins.append(data[label]['min'])
-        maxs.append(data[label]['maxs'])
+        maxs.append(data[label]['max'])
 
     return mins, maxs
 

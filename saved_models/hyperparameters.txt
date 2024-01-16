@@ -1,0 +1,24 @@
+1.
+test_data_364
+Best Model Parameters:
+parameter: hidden_size, value: 48
+parameter: batch_size, value: 128
+parameter: learning_rate, value: 0.1
+parameter: num_epochs, value: 200
+parameter: train_portion, value: 0.95
+best result: 0.8104395866394043    --> f1-score
+test accuracy: 0.8154899691358025
+
+
+
+2. 
+test_data_364
+Best Model Parameters:
+parameter: hidden_size, value: 80
+parameter: batch_size, value: 32
+parameter: learning_rate, value: 0.08
+parameter: num_epochs, value: 200
+parameter: train_portion, value: 0.85
+best result: 0.8159340620040894    --> f1-score
+test accuracy: 0.8255208333333334
+

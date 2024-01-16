@@ -26,7 +26,12 @@ def objective(trial) -> float:
                             test_dataset=test_dataset,
                             params=hyper_params)
 
-    return result_dict['test_acc']
+    print(
+        f"test accuracy: {result_dict['test_acc']} | "
+        f"test f1 score: {result_dict['test_f1_score']}"
+    )
+
+    return result_dict['test_f1_score']
 
 
 def find_optimum_model() -> None:
@@ -42,7 +47,7 @@ def find_optimum_model() -> None:
     print(f"\nBest Model Parameters:")
     for key, value in best_params.items():
         print(f"parameter: {key}, value: {value}")
-    print(f"best accuracy: {study.best_value}")
+    print(f"best result: {study.best_value}")
 
 
 if __name__ == "__main__":

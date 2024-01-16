@@ -6,6 +6,7 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader
 from typing import Tuple, Dict
+from torchmetrics.classification import MulticlassF1Score
 from model import EORMulticlassModel
 from data_utils import EORDataset, get_train_valid_data
 from constants import *
@@ -67,7 +68,7 @@ def valid_step(model: nn.Module,
             loss = loss_fn(valid_pred_logits, classes)
             valid_loss += loss.item()
 
-            outputs_class = valid_pred_logits.argmax(dim=1)
+            outputs_class = torch.argmax(torch.softmax(valid_pred_logits, dim=1), dim=1)
             valid_acc += ((outputs_class == classes).sum().item() / len(outputs_class))
 
     # Adjust metrics to get average loss and accuracy per batch
@@ -77,25 +78,46 @@ def valid_step(model: nn.Module,
     return valid_loss, valid_acc
 
 
-def test_step(model: nn.Module, test_dataloader: torch.utils.data.DataLoader) -> float:
+def calculate_f1(preds: torch.Tensor, target: torch.Tensor) -> float:
+    """Calculates f1-score based on all classes
+
+    For difference between average='micro' & average='macro', see
+    https://datascience.stackexchange.com/questions/15989/micro-average-vs-macro-average-performance-in-a-multiclass-classification-settin
+
+    :param preds: a 1d tensor of model predictions whose length is the number of samples
+    :param target: a 1d tensor of actual values whose length is the number of samples
+    :return: f1-score
+    """
+    mcf1s = MulticlassF1Score(num_classes=NUM_CLASSES, average='micro')
+    return mcf1s(preds, target)
+
+
+def test_step(model: nn.Module, test_dataloader: torch.utils.data.DataLoader) -> Tuple[float, float]:
     """Performs the testing steps of a (trained) nn.Module
 
     :param model: a nn.Module
     :param test_dataloader: a DataLoader containing test data
-    :return: test prediction accuracy
+    :return: a tuple where the first item is test prediction accuracy
+            and the second item is the average f1 score
     """
     test_acc = 0
     model.eval()
+    preds = torch.empty(0, 1)
+    target = torch.empty(0, 1)
 
     with torch.inference_mode():
         for inputs, classes in test_dataloader:
             test_pred_logits = model(inputs)
-            calculated_classes = test_pred_logits.argmax(dim=1)
+            calculated_classes = torch.argmax(torch.softmax(test_pred_logits, dim=1), dim=1)
             test_acc += ((calculated_classes == classes).sum().item() / len(calculated_classes))
 
-    test_acc /= len(test_dataloader)
+            preds = torch.cat((preds, calculated_classes.unsqueeze(1)), dim=0)
+            target = torch.cat((target, classes.unsqueeze(1)), dim=0)
 
-    return test_acc
+    test_acc /= len(test_dataloader)
+    f1_score = calculate_f1(preds, target)
+
+    return test_acc, f1_score
 
 
 def train_model(model: nn.Module,
@@ -157,7 +179,7 @@ def train_model(model: nn.Module,
 
 def test_model(model: nn.Module,
                test_dataset: EORDataset,
-               batch_size: int) -> float:
+               batch_size: int) -> Dict[str, float]:
     """Test the trained model
 
     :param model: a nn.Module
@@ -171,9 +193,12 @@ def test_model(model: nn.Module,
                                  shuffle=False,
                                  num_workers=os.cpu_count())
 
-    test_acc = test_step(model=model, test_dataloader=test_dataloader)
+    test_acc, test_f1_score = test_step(model=model, test_dataloader=test_dataloader)
 
-    return test_acc
+    test_result_dict = {'test_acc': test_acc,
+                        'test_f1_score': test_f1_score}
+
+    return test_result_dict
 
 
 def save_model(model: nn.Module, params: Dict[str, float]) -> None:
@@ -223,10 +248,10 @@ def run_model(input_dataset: EORDataset,
                               num_epochs=params['num_epochs'],
                               lr=params['learning_rate'])
     # calculate test results
-    test_acc = test_model(model=model,
-                          test_dataset=test_dataset,
-                          batch_size=params['batch_size'])
-    result_dict.update({'test_acc': test_acc})
+    test_result_dict = test_model(model=model,
+                                  test_dataset=test_dataset,
+                                  batch_size=params['batch_size'])
+    result_dict.update(test_result_dict)
 
     # save the model
     save_model(model=model, params=params)

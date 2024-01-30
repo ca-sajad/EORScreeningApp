@@ -9,7 +9,7 @@ So far, the followings have been performed: <br>
 5. NN hyperparameters are optimized using a module called "optuna" where the objective function runs the model on the test set and tries to maximize the average multi-class f1-score.
 6. The best model is selected and the following graphs are plotted. Currently, the average f1-score is 0.81.
 
-#### &emsp;&emsp;&emsp;&emsp;f1-score for each class &emsp;&emsp;&emsp;&emsp;&emsp; precision-recall curve  &emsp;&emsp; &emsp;Receiver Operating Characteristic curve  <br>
+#### &emsp;&emsp;&emsp;&emsp;f1-score for each class &emsp;&emsp;&emsp;&emsp;&emsp; precision-recall curve  &emsp;&emsp; Receiver Operating Characteristic curve  <br>
 <p float="left">
 <img src="https://github.com/ca-sajad/EORScreeningApp/blob/main/saved_models/1/f1-score.png" alt="f1-score for each class" width="250"/>
 <img src="https://github.com/ca-sajad/EORScreeningApp/blob/main/saved_models/1/precision-recall-curve.png" alt="precision-recall curve for each class" width="250"/>
